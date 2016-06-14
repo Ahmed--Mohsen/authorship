@@ -99,7 +99,7 @@ def classify(x, y):
 
 def save_results(accuracy, feature_size, experiment):
 	file = open('shallow.csv','a')
-	file.write("%s,%d,%f" %(experiment, feature_size, accuracy))
+	file.write("%s,%d,%f\n" %(experiment, feature_size, accuracy))
 	file.close()
 
 def read_csv(path):
