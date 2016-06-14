@@ -28,11 +28,11 @@ def load_data(features_path="data/features_ngram_huge.npy", labels_path="data/la
 	return ((train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y))
 	
 
-def load_dataset(path_id="", use_float_32=False, test_ratio=0.3, valid_ratio=0.1):	
+def load_dataset(path_id="", folder="", use_float_32=False, test_ratio=0.3, valid_ratio=0.1):	
 #def load_dataset(path_id="", use_float_32=False, test_ratio=0.2, valid_ratio=0.1):
 	# reading full dataset
-	features_path = "data/features%s.npy"%(path_id)
-	labels_path = "data/labels%s.npy"%(path_id)
+	features_path = "data/%s/features%s.npy"%(folder, path_id)
+	labels_path = "data/%s/labels%s.npy"%(folder, path_id)
 	
 
 	features = np.load(features_path)

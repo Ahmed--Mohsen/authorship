@@ -45,6 +45,8 @@ from mlp import HiddenLayer
 from dA import dA
 
 import data_handler
+from sklearn.svm import LinearSVC
+from sklearn import cross_validation
 
 # start-snippet-1
 class SdA(object):
@@ -327,15 +329,8 @@ class SdA(object):
 
         return train_fn, valid_score, test_score
 
-    def save_code_features(self, features_path="features.csv"):
-        features, labels = data_handler.load_full_dataset("_all")
-        for dA in self.dA_layers:
-            features = dA.get_hidden_values(features)
-        print features.eval()
-        print features.shape.eval()
-        data_handler.save_data(features.eval(), labels.get_value(borrow=True), features_path)
 				
-    def save_code_features_gpu(self, datasets, features_path="features.csv"):
+    def save_code_features_gpu(self, datasets, features_path="features.csv", experiment="id" ,feature_size=1000, finetune_lr=0.1, pretrain_lr=0.1, noise_level=0.1):
         train_set_x, train_set_y = datasets[0]
         valid_set_x, valid_set_y = datasets[1]
         test_set_x, test_set_y = datasets[2]
@@ -359,6 +354,18 @@ class SdA(object):
 
         data_handler.save_data(x, y, features_path)
 				
+        # apply svm classification
+        try:				
+          clf = LinearSVC()
+          scores = cross_validation.cross_val_score(clf, x, y, cv=10)
+          accuracy = scores.mean()
+				
+          # save the accuracy
+          file = open('deep.csv','a')
+          file.write("%s,%d,%f,%f,%f,%f\n" %(experiment, feature_size, noise_level, pretrain_lr, finetune_lr, accuracy))
+          file.close()
+        except:
+					pass				
 								
     def save_code_features_test_train(self, path_id=""):
         train_features_path = "features_train%s.csv"%(path_id)
@@ -382,9 +389,9 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.2, pretraining_
              pretrain_lr=0.01, training_epochs=1000,
               batch_size=1):
 """				
-def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining_epochs=30,
-             pretrain_lr=0.0002, training_epochs=1000,
-              batch_size=1, noise="binomial", decoder="sigmoid"):							
+def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_lr=0.01, pretraining_epochs=1,
+             pretrain_lr=0.0002, training_epochs=1,
+              batch_size=1, noise="binomial", noise_level=0.2,decoder="sigmoid"):							
     """
     Demonstrates how to train and test a stochastic denoising autoencoder.
 
@@ -408,7 +415,7 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining
 
     """
 
-    datasets = data_handler.load_dataset(dataset_postfix, True)
+    datasets = data_handler.load_dataset(dataset_postfix, dataset_prefix, True)
     #datasets = data_handler.load_data()		
     #datasets = load_data(dataset)
     train_set_x, train_set_y = datasets[0]
@@ -448,7 +455,7 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining
     start_time = time.clock()
     ## Pre-train layer-wise
     #corruption_levels = [.4] * sda.n_layers
-    corruption_levels = [.2] * sda.n_layers
+    corruption_levels = [noise_level] * sda.n_layers
     for i in xrange(sda.n_layers):
         # go through pretraining epochs
         for epoch in xrange(pretraining_epochs):
@@ -467,8 +474,6 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining
                           os.path.split(__file__)[1] +
                           ' ran for %.2fm' % ((end_time - start_time) / 60.))
 													
-    #sda.save_code_features("pre_train_feature_ngram_binary_more.csv")
-    #return
     # end-snippet-4
     ########################
     # FINETUNING THE MODEL #
@@ -518,7 +523,7 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining
                 # if we got the best validation score until now
                 if this_validation_loss < best_validation_loss:
 
-                    #improve patience if loss improvement is good enough
+                    # improve patience if loss improvement is good enough
                     if (
                         this_validation_loss < best_validation_loss *
                         improvement_threshold
@@ -542,8 +547,8 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining
                 break
 
     end_time = time.clock()
-    sda.save_code_features_gpu(datasets, "features_%s.csv"%(dataset_postfix))
-    #sda.save_code_features_test_train()
+    sda.save_code_features_gpu(datasets, "features_%s.csv"%(dataset_prefix+dataset_postfix), dataset_prefix+dataset_postfix ,input_size, finetune_lr, pretrain_lr, noise_level)
+
     print(
         (
             'Optimization complete with best validation score of %f %%, '
@@ -558,16 +563,18 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.01, pretraining
 
 
 if __name__ == '__main__':
-    features = glob.glob("data/features*.npy")
+    features = glob.glob("data/3-gram-most/features*.npy")
     for feature in features:
+      prefix = feature.split("/")[1]
       s = feature.split("_")
       postfix = "_"+s[-1].split(".")[0]
-      print postfix
+      print "Experiment = %s" %(postfix)
       print "-"*100
-      test_SdA(dataset_postfix=postfix)			
-      """
-      s = feature.split("_")
-      last = s[-1].split(".")[0]
-      postfix = "_"+s[-2]+"_"+last
-      print	postfix
-      """
+			
+      # cross validating the hyper params
+      for pretrain_lr in [0.01, 0.001, 0.0001]:
+        for finetune_lr in [0.01, 0.001, 0.0001]:
+          for noise_level in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
+            test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise="gaussian", noise_level=noise_level, decoder="linear")			
+
