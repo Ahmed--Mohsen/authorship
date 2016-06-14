@@ -33,6 +33,10 @@ from sklearn import cross_validation
 from sklearn import preprocessing
 import scipy.sparse as sps
 
+# set log output
+f = open("output.log", 'w')
+sys.stdout = f
+
 
 def read_corpus(corpus_root="C50"):
 	corpus = PlaintextCorpusReader(corpus_root, '.*txt')
@@ -167,6 +171,9 @@ def create_datasets():
 	create_word_dataset()
 	
 create_datasets()
+
+# closing log file
+f.close()
 
 #print "Read Corpus"
 #x,y = read_corpus("C50")
