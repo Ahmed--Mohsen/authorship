@@ -122,7 +122,7 @@ def create_dataset(corpus_root, folder_name ,analyzer, norm, ngram, lower, selec
 	for feature_size in range(1000, 10001, 1000):
 		print "creating features of size", feature_size, "for", folder_name
 		features = extract_features(x, y, analyzer=analyzer, norm=norm, ngram=ngram, lower=lower, selection=selection, feature_size=feature_size)
-		accuracy =  classify(features, y)
+		accuracy =  classify(features, y) * 100
 		save_results(accuracy, feature_size, folder_name)
 		save_features(features, y, "%s/features_%d" % (directory, feature_size), "%s/labels_%d" % (directory, feature_size))
 	
@@ -166,7 +166,7 @@ def create_datasets():
 	create_char_dataset()
 	create_word_dataset()
 	
-#create_datasets()
+create_datasets()
 
 #print "Read Corpus"
 #x,y = read_corpus("C50")
