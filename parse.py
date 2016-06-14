@@ -3,6 +3,7 @@
 
 import sys  
 import os
+import os.path
 reload(sys)  
 sys.setdefaultencoding('utf8')
 from nltk.corpus import stopwords
@@ -34,8 +35,8 @@ from sklearn import preprocessing
 import scipy.sparse as sps
 
 # set log output
-f = open("output.log", 'w')
-sys.stdout = f
+#f = open("output.log", 'w')
+#sys.stdout = f
 
 
 def read_corpus(corpus_root="C50"):
@@ -125,6 +126,12 @@ def create_dataset(corpus_root, folder_name ,analyzer, norm, ngram, lower, selec
 	# vary the features size from 1000 till 10,000
 	for feature_size in range(1000, 10001, 1000):
 		print "creating features of size", feature_size, "for", folder_name
+		
+		# check if current features have been created before
+		if os.path.isfile("%s/features_%d.npy" % (directory, feature_size)):
+			print " Features exist skipping..."
+			continue
+		
 		features = extract_features(x, y, analyzer=analyzer, norm=norm, ngram=ngram, lower=lower, selection=selection, feature_size=feature_size)
 		accuracy =  classify(features, y) * 100
 		save_results(accuracy, feature_size, folder_name)
@@ -133,11 +140,11 @@ def create_dataset(corpus_root, folder_name ,analyzer, norm, ngram, lower, selec
 
 def create_char_dataset():
 	# seperate n-gram most frequent
-	for n in range(3, 5):
+	for n in range(3, 6):
 		create_dataset("C50", "%d-gram-most" %(n), "char", None, (n,n), False, "most")
 		
 	# seperate n-gram most chi
-	for n in range(3, 5):
+	for n in range(3, 6):
 		create_dataset("C50", "%d-gram-chi" %(n), "char", None, (n,n), False, "chi")
 	
 	for lowercase in [False, True]:
@@ -173,7 +180,7 @@ def create_datasets():
 create_datasets()
 
 # closing log file
-f.close()
+#f.close()
 
 #print "Read Corpus"
 #x,y = read_corpus("C50")
