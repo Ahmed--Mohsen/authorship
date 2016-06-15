@@ -389,9 +389,9 @@ def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.2, pretraining_
              pretrain_lr=0.01, training_epochs=1000,
               batch_size=1):
 """				
-def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_lr=0.01, pretraining_epochs=1,
-             pretrain_lr=0.0002, training_epochs=1,
-              batch_size=1, noise="binomial", noise_level=0.2,decoder="sigmoid"):							
+def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_lr=0.01, pretraining_epochs=50,
+             pretrain_lr=0.0002, training_epochs=500,
+              batch_size=1, noise="binomial", noise_level=0.2, decoder="sigmoid"):							
     """
     Demonstrates how to train and test a stochastic denoising autoencoder.
 
@@ -563,7 +563,7 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
 
 
 if __name__ == '__main__':
-    features = glob.glob("data/3-gram-most/features*.npy")
+    features = glob.glob("data/1_5-gram*/features*.npy")
     for feature in features:
       prefix = feature.split("/")[1]
       s = feature.split("_")
@@ -571,10 +571,17 @@ if __name__ == '__main__':
       print "Experiment = %s" %(postfix)
       print "-"*100
 			
+      # check noise and decoder according to features
+      noise = "gaussian"
+      decoder = "linear"
+      if "l2" in feature or "minmax" in feature:
+        noise = "binomial"
+        decoder = "sigmoid"				
+      print noise, decoder			
       # cross validating the hyper params
       for pretrain_lr in [0.01, 0.001, 0.0001]:
         for finetune_lr in [0.01, 0.001, 0.0001]:
           for noise_level in [0.1, 0.2, 0.3, 0.4, 0.5]:
             print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
-            test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise="gaussian", noise_level=noise_level, decoder="linear")			
+            test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)			
 
