@@ -50,7 +50,7 @@ def read_corpus(corpus_root="C50"):
 def extract_features(x, y, analyzer="char", norm=None, ngram=(1,5), lower=True, selection="chi", feature_size=5000):
 	max_features = feature_size
 	if selection == "chi":
-		max_features = 50000 # to be filtered using chi^2
+		max_features = 20000 # to be filtered using chi^2
 		
 	# check min max norm
 	scaling = norm
