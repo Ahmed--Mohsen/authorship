@@ -21,4 +21,4 @@ labels = glob.glob("data/*/features*.npy")
 for label in labels:
 	y = np.load(label)
 	print y.shape
-	print y[0]
+	print y
