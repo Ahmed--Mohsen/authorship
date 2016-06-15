@@ -486,7 +486,7 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
         batch_size=batch_size,
         learning_rate=finetune_lr
     )
-
+    sys.stdout.flush()
     print '... finetunning the model'
     # early-stopping parameters
     patience = 10 * n_train_batches  # look as this many examples regardless
@@ -560,6 +560,7 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
     print >> sys.stderr, ('The training code for file ' +
                           os.path.split(__file__)[1] +
                           ' ran for %.2fm' % ((end_time - start_time) / 60.))
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':
