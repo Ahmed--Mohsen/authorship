@@ -568,7 +568,7 @@ if __name__ == '__main__':
       prefix = feature.split("/")[1]
       s = feature.split("_")
       postfix = "_"+s[-1].split(".")[0]
-      print "Experiment = %s" %(postfix)
+      print "Experiment = %s" %(prefix+postfix)
       print "-"*100
 			
       # check noise and decoder according to features
