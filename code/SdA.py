@@ -358,7 +358,7 @@ class SdA(object):
         try:				
           clf = LinearSVC()
           scores = cross_validation.cross_val_score(clf, x, y, cv=10)
-          accuracy = scores.mean()
+          accuracy = scores.mean() * 100
 				
           # save the accuracy
           file = open('deep.csv','a')
