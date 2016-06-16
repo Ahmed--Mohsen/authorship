@@ -580,9 +580,9 @@ if __name__ == '__main__':
         decoder = "sigmoid"				
       print noise, decoder			
       # cross validating the hyper params
-      for pretrain_lr in [0.001, 0.0001, 0.00001]:
-        for finetune_lr in [0.001, 0.0001, 0.00001]:
-          for noise_level in [0.1, 0.2, 0.3, 0.4, 0.5]:
+      for pretrain_lr in [0.00001,  0.0001, 0.001]:
+        for finetune_lr in [0.0001, 0.001, 0.01]:
+          for noise_level in [0, 0.05, 0.10, 0.15, 0.30, 0.50]:
             print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
             test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)			
 
