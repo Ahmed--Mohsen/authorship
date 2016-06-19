@@ -48,6 +48,9 @@ import data_handler
 from sklearn.svm import LinearSVC
 from sklearn import cross_validation
 
+#import threading
+#threadLock = threading.Lock()
+
 # start-snippet-1
 class SdA(object):
     """Stacked denoising auto-encoder class (SdA)
@@ -330,7 +333,7 @@ class SdA(object):
         return train_fn, valid_score, test_score
 
 				
-    def save_code_features_gpu(self, datasets, features_path="features.csv", experiment="id" ,feature_size=1000, finetune_lr=0.1, pretrain_lr=0.1, noise_level=0.1):
+    def save_code_features_gpu(self, datasets, features_path="features.csv", experiment="id" ,feature_size=1000, finetune_lr=0.1, pretrain_lr=0.1, noise_level=0.1, best_validation_loss=0, test_score=0):
         train_set_x, train_set_y = datasets[0]
         valid_set_x, valid_set_y = datasets[1]
         test_set_x, test_set_y = datasets[2]
@@ -361,9 +364,11 @@ class SdA(object):
           accuracy = scores.mean() * 100
 				
           # save the accuracy
+          #threadLock.acquire()
           file = open('deep.csv','a')
-          file.write("%s,%d,%f,%f,%f,%f\n" %(experiment, feature_size, noise_level, pretrain_lr, finetune_lr, accuracy))
+          file.write("%s,%d,%f,%f,%f,%f,%f,%f\n" %(experiment, feature_size, noise_level, pretrain_lr, finetune_lr, accuracy, best_validation_loss * 100., test_score * 100.))
           file.close()
+          #threadLock.release()
         except:
 					pass				
 								
@@ -384,13 +389,24 @@ class SdA(object):
         data_handler.save_data(train_set_x.eval(), train_set_y.get_value(borrow=True), train_features_path)								
         data_handler.save_data(test_set_x.eval(), test_set_y.get_value(borrow=True), test_features_path)				
 
+
+def calculated(experiment, finetune_lr, pretrain_lr, noise_level):
+    with open("deep.csv") as f:
+        results = f.readlines()
+    for result in results:
+        if not "," in result: continue			
+        reading = result.strip().split(",")
+
+        if reading[0] == experiment and float(reading[2]) == noise_level and float(reading[3]) == pretrain_lr and float(reading[4]) == finetune_lr:
+            return True
+    return False																	
 """
 def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.2, pretraining_epochs=30,
              pretrain_lr=0.01, training_epochs=1000,
               batch_size=1):
 """				
 def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_lr=0.01, pretraining_epochs=50,
-             pretrain_lr=0.0002, training_epochs=500,
+             pretrain_lr=0.0002, training_epochs=300,
               batch_size=1, noise="binomial", noise_level=0.2, decoder="sigmoid"):							
     """
     Demonstrates how to train and test a stochastic denoising autoencoder.
@@ -547,7 +563,7 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
                 break
 
     end_time = time.clock()
-    sda.save_code_features_gpu(datasets, "features_%s.csv"%(dataset_prefix+dataset_postfix), dataset_prefix+dataset_postfix ,input_size, finetune_lr, pretrain_lr, noise_level)
+    sda.save_code_features_gpu(datasets, "features_%s.csv"%(dataset_prefix+dataset_postfix), dataset_prefix+dataset_postfix ,input_size, finetune_lr, pretrain_lr, noise_level, best_validation_loss, test_score)
 
     print(
         (
@@ -579,10 +595,15 @@ if __name__ == '__main__':
         noise = "binomial"
         decoder = "sigmoid"				
       print noise, decoder			
+      
       # cross validating the hyper params
-      for pretrain_lr in [0.00001,  0.0001, 0.001]:
-        for finetune_lr in [0.0001, 0.001, 0.01]:
-          for noise_level in [0.05, 0.10, 0.15, 0.30, 0.50]:
-            print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
-            test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)			
+      pretrain_lr = float(sys.argv[1])
+      #for pretrain_lr in [0.00001,  0.0001, 0.001]:
+      for finetune_lr in [0.0001, 0.001, 0.01]:
+        for noise_level in [0.05, 0.10, 0.15, 0.30, 0.50]:
+          print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
+          if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level):
+            print "skipping..."
+            continue
+          test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)			
 
