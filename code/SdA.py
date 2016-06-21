@@ -400,6 +400,23 @@ def calculated(experiment, finetune_lr, pretrain_lr, noise_level):
         if reading[0] == experiment and float(reading[2]) == noise_level and float(reading[3]) == pretrain_lr and float(reading[4]) == finetune_lr:
             return True
     return False																	
+		
+def get_params(feature):
+  prefix = feature.split("/")[1]
+  s = feature.split("_")
+  postfix = "_"+s[-1].split(".")[0]
+  print "Experiment = %s" %(prefix+postfix)
+  print "-"*100
+	
+  # check noise and decoder according to features
+  noise = "gaussian"
+  decoder = "linear"
+  if "l2" in feature or "minmax" in feature:
+    noise = "binomial"
+    decoder = "sigmoid"				
+  
+  return prefix, postfix, noise, decoder
+	
 """
 def test_SdA(dataset_postfix='_v', class_count=50, finetune_lr=0.2, pretraining_epochs=30,
              pretrain_lr=0.01, training_epochs=1000,
@@ -580,30 +597,23 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
 
 
 if __name__ == '__main__':
-    features = glob.glob("data/1_5-gram*/features*.npy")
-    for feature in features:
-      prefix = feature.split("/")[1]
-      s = feature.split("_")
-      postfix = "_"+s[-1].split(".")[0]
-      print "Experiment = %s" %(prefix+postfix)
-      print "-"*100
-			
-      # check noise and decoder according to features
-      noise = "gaussian"
-      decoder = "linear"
-      if "l2" in feature or "minmax" in feature:
-        noise = "binomial"
-        decoder = "sigmoid"				
-      print noise, decoder			
-      
-      # cross validating the hyper params
-      pretrain_lr = float(sys.argv[1])
-      #for pretrain_lr in [0.00001,  0.0001, 0.001]:
-      for finetune_lr in [0.0001, 0.001, 0.01]:
-        for noise_level in [0.05, 0.10, 0.15, 0.30, 0.50]:
-          print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
-          if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level):
-            print "skipping..."
-            continue
-          test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)			
+  features = glob.glob("data/1_5-gram*/features*.npy")
 
+  # parsing learning rate params
+  # 0.00001-0.001  0.00001-0.01 0.0001-0.001 0.0001-0.01			
+  pretrain_lr, finetune_lr = [float(i) for i in sys.argv[1].split("-")]
+
+  # cross validating the hyper params
+  #for pretrain_lr in [0.00001,  0.0001]: # discard 0.001
+  #for finetune_lr in [0.001, 0.01]: # discard 0.0001
+  for noise_level in [0.05, 0.10, 0.15, 0.30, 0.50]:
+    print "\nCross Validating with pretrain=%f, finetune=%f, noise=%f...\n" %(pretrain_lr, finetune_lr, noise_level)
+
+    for feature in features:
+      prefix, postfix, noise, decoder = get_params(feature)
+      print noise, decoder
+      
+      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level):
+        print "skipping..."
+        continue
+      test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)
