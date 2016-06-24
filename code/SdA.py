@@ -396,7 +396,6 @@ def calculated(experiment, finetune_lr, pretrain_lr, noise_level):
     for result in results:
         if not "," in result: continue			
         reading = result.strip().split(",")
-
         if reading[0] == experiment and float(reading[2]) == noise_level and float(reading[3]) == pretrain_lr and float(reading[4]) == finetune_lr:
             return True
     return False																	
@@ -613,7 +612,7 @@ if __name__ == '__main__':
       prefix, postfix, noise, decoder = get_params(feature)
       print noise, decoder
       
-      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level):
+      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level) or "True" in feature:
         print "skipping..."
         continue
       test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)
