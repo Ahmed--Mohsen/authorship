@@ -596,8 +596,8 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
 
 
 if __name__ == '__main__':
-  features = glob.glob("data/1_5-gram*/features*.npy")
-
+  #features = glob.glob("data/1_5-gram*/features*.npy")
+  features = glob.glob("data/words*/features*.npy")
   # parsing learning rate params
   # 0.00001-0.001  0.00001-0.01 0.0001-0.001 0.0001-0.01			
   pretrain_lr, finetune_lr = [float(i) for i in sys.argv[1].split("-")]
