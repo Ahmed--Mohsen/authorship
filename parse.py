@@ -155,7 +155,10 @@ def create_char_dataset():
 		# variable n-gram with normalization
 		create_dataset("C50", "1_5-gram-l2-most-%s"%(lowercase), "char", "l2", (1,5), lowercase, "most")
 		create_dataset("C50", "1_5-gram-l2-chi-%s"%(lowercase), "char", "l2", (1,5), lowercase, "chi")
-	
+		
+		create_dataset("C50", "1_5-gram-l1-most-%s"%(lowercase), "char", "l1", (1,5), lowercase, "most")
+		create_dataset("C50", "1_5-gram-l1-chi-%s"%(lowercase), "char", "l1", (1,5), lowercase, "chi")
+			
 		create_dataset("C50", "1_5-gram-minmax-most-%s"%(lowercase), "char", "minmax", (1,5), lowercase, "most")
 		create_dataset("C50", "1_5-gram-minmax-chi-%s"%(lowercase), "char", "minmax", (1,5), lowercase, "chi")
 
