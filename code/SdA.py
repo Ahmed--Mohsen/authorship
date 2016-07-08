@@ -596,8 +596,8 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
 
 
 if __name__ == '__main__':
-  #features = glob.glob("data/1_5-gram*/features*.npy")
-  features = glob.glob("data/words*/features*.npy")
+  features = glob.glob("data/1_5-gram*/features*.npy")
+  #features = glob.glob("data/words*/features*.npy")
   #features = glob.glob("data/1_5-gram-l1-chi-False/features*.npy")
   # parsing learning rate params
   # 0.00001-0.001  0.00001-0.01 0.0001-0.001 0.0001-0.01			
@@ -613,7 +613,7 @@ if __name__ == '__main__':
       prefix, postfix, noise, decoder = get_params(feature)
       print noise, decoder
       
-      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level) or "True" in feature:
+      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level) or "True" in feature or "l2" in feature:
         print "skipping..."
         continue
       test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)
