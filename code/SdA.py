@@ -613,7 +613,7 @@ if __name__ == '__main__':
       prefix, postfix, noise, decoder = get_params(feature)
       print noise, decoder
       
-      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level) or "True" in feature or "l2" in feature:
+      if calculated(prefix+postfix, finetune_lr, pretrain_lr, noise_level) or "True" in feature or "l2" in feature or "l1" in feature:
         print "skipping..."
         continue
       test_SdA(dataset_postfix=postfix, dataset_prefix=prefix,finetune_lr=finetune_lr, pretrain_lr=pretrain_lr, noise=noise, noise_level=noise_level, decoder=decoder)
