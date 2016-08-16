@@ -1,9 +1,0 @@
-1.	http://www.guardian.co.uk/world/2006/mar/05/sudan.guardiancolumnists
-2.	http://www.guardian.co.uk/world/2005/oct/16/gender.observercolumnists
-3.	http://www.guardian.co.uk/world/2004/oct/31/uselections2004.usa3
-4.	http://www.guardian.co.uk/world/2002/aug/11/iraq
-5.	http://www.guardian.co.uk/world/2002/jul/28/iraq.guardiancolumnists
-6.	http://www.guardian.co.uk/world/2001/sep/16/september11.usa22
-7.	http://www.guardian.co.uk/world/2000/nov/26/wto.comment
-8.	http://www.guardian.co.uk/world/2000/nov/12/uselections2000.usa15
-9.	http://www.guardian.co.uk/world/1999/may/09/armstrade.comment

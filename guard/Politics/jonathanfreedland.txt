@@ -1,9 +1,0 @@
-1.	http://www.guardian.co.uk/politics/2008/sep/24/gordonbrown.labourleadership
-2.	http://www.guardian.co.uk/politics/2007/jun/05/tonyblair.jonathanfreedland
-3.	http://www.guardian.co.uk/politics/2005/may/18/foreignpolicy.politicalcolumnists
-4.	http://www.guardian.co.uk/politics/2004/dec/29/politicalcolumnists.comment
-5.	http://www.guardian.co.uk/politics/2003/dec/31/politicalcolumnists.comment
-6.	http://www.guardian.co.uk/politics/2003/jan/01/politicalcolumnists.comment
-7.	http://www.guardian.co.uk/politics/2002/aug/14/politicalcolumnists.comment
-8.	http://www.guardian.co.uk/politics/2001/mar/14/westminster.politicalcolumnists
-9.	http://www.guardian.co.uk/politics/2000/mar/22/comment.jonathanfreedland
