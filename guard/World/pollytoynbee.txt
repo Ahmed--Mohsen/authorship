@@ -1,0 +1,12 @@
+1.	http://www.guardian.co.uk/world/2004/jul/14/gender.comment
+2.	http://www.guardian.co.uk/world/2003/oct/17/catholicism.religion
+3.	http://www.guardian.co.uk/world/2002/nov/13/afghanistan.comment
+4.	http://www.guardian.co.uk/world/2001/nov/07/afghanistan.terrorism10
+5.	http://www.guardian.co.uk/world/2001/oct/24/comment.pollytoynbee
+6.	http://www.guardian.co.uk/world/2001/sep/26/afghanistan.september114
+7.	http://www.guardian.co.uk/world/2001/apr/04/usa.comment
+8.	http://www.guardian.co.uk/world/2000/aug/23/uselections2000.usa
+9.	http://www.guardian.co.uk/world/2000/mar/10/uselections2000.usa
+10.	http://www.guardian.co.uk/world/2000/mar/09/uselections2000.usa4
+11.	http://www.guardian.co.uk/world/1999/sep/08/indonesia.guardiancolumnists
+12.	http://www.guardian.co.uk/world/1999/jul/14/balkans.guardiancolumnists
