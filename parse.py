@@ -33,6 +33,8 @@ from sklearn import metrics
 from sklearn import cross_validation
 from sklearn import preprocessing
 import scipy.sparse as sps
+from sklearn import metrics
+from splitter import Splitter
 
 # set log output
 #f = open("output.log", 'w')
@@ -42,8 +44,8 @@ import scipy.sparse as sps
 def read_corpus(corpus_root="C50"):
 	corpus = PlaintextCorpusReader(corpus_root, '.*txt')
 	documents_names = corpus.fileids()
-	data = [corpus.raw(document_name) for document_name in documents_names]
-	labels = [label.split("/")[-2] for label in documents_names] #label = author id
+	data = [corpus.raw(document_name).decode('utf-8', 'ignore') for document_name in documents_names]
+	labels = ["/".join(label.split("/")[0:2]) for label in documents_names] #label = domain/author-id
 	print "Data Size =", len(data)
 	return (data, labels)
 
@@ -97,10 +99,11 @@ def classify(x, y):
 	scores = cross_validation.cross_val_score(clf, x, y, cv=10)
 	print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 	return scores.mean()
+	
 
-def save_results(accuracy, feature_size, experiment):
-	file = open('shallow.csv','a')
-	file.write("%s,%d,%f\n" %(experiment, feature_size, accuracy))
+def save_results(src_topic, dest_topic, accuracy, feature_size, experiment):
+	file = open('shallow-cross.csv','a')
+	file.write("%s,%s,%s,%d,%f\n" %(src_topic, dest_topic, experiment, feature_size, accuracy))
 	file.close()
 
 def read_csv(path):
@@ -114,15 +117,15 @@ def read_csv(path):
 
 
 def create_dataset(corpus_root, folder_name ,analyzer, norm, ngram, lower, selection):
-	
+
 	# check if folder name exists or not
-	directory = "data/%s" %(folder_name)
+	directory = "data-cross/%s" %(folder_name)
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 	
 	# parse the corpus
 	x,y = read_corpus(corpus_root)
-	
+
 	# vary the features size from 1000 till 10,000
 	for feature_size in range(1000, 10001, 1000):
 		print "creating features of size", feature_size, "for", folder_name
@@ -133,8 +136,14 @@ def create_dataset(corpus_root, folder_name ,analyzer, norm, ngram, lower, selec
 			continue
 		
 		features = extract_features(x, y, analyzer=analyzer, norm=norm, ngram=ngram, lower=lower, selection=selection, feature_size=feature_size)
-		accuracy =  classify(features, y) * 100
-		save_results(accuracy, feature_size, folder_name)
+		
+		topics = ["Politics", "Society", "World", "UK"]
+		genres = [topics, "Books"]
+		s = Splitter(features, y, topics, genres)
+		splits = s.split()
+		for domain_a, domain_b, accuracy in splits:
+			save_results(domain_a, domain_b, accuracy, feature_size, folder_name)
+		
 		save_features(features, y, "%s/features_%d" % (directory, feature_size), "%s/labels_%d" % (directory, feature_size))
 	
 
@@ -180,7 +189,29 @@ def create_datasets():
 	create_char_dataset()
 	create_word_dataset()
 	
-create_datasets()
+def create_cross_dataset():
+	# 3-gram
+	create_dataset("guard", "%d-gram-most" %(3), "char", None, (3,3), False, "most")
+	
+	# frequent words
+	create_dataset("guard", "words-most", "word", None, (1,1), True, "most")
+	
+	# [1-5] gram
+	create_dataset("guard", "1_5-gram-most", "char", None, (1,5), False, "most")
+	create_dataset("guard", "1_5-gram-chi", "char", None, (1,5), False, "chi")
+	
+	# [1-5] gram normalized
+	create_dataset("guard", "1_5-gram-minmax-most", "char", "minmax", (1,5), False, "most")
+	create_dataset("guard", "1_5-gram-minmax-chi", "char", "minmax", (1,5), False, "chi")
+
+create_cross_dataset()
+	
+#create_datasets()
+#create_dataset("guard", "3-gram-most-%s"%(False), "char", None, (1,5), False, "most")
+#n = 3
+#create_dataset("guard", "%d-gram-most" %(n), "char", None, (n,n), False, "most")
+#x, y = read_corpus("guard")
+#print y
 
 # closing log file
 #f.close()
