@@ -44,7 +44,9 @@ from splitter import Splitter
 def read_corpus(corpus_root="C50"):
 	corpus = PlaintextCorpusReader(corpus_root, '.*txt')
 	documents_names = corpus.fileids()
-	data = [corpus.raw(document_name).decode('utf-8', 'ignore') for document_name in documents_names]
+	#data = [corpus.raw(document_name).decode('utf-8', 'ignore') for document_name in documents_names]
+	data = [open(corpus_root+"/"+document_name).read().decode('utf-8', 'ignore') for document_name in documents_names]
+
 	labels = ["/".join(label.split("/")[0:2]) for label in documents_names] #label = domain/author-id
 	print "Data Size =", len(data)
 	return (data, labels)
