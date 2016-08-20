@@ -31,8 +31,8 @@ def load_data(features_path="data/features_ngram_huge.npy", labels_path="data/la
 def load_dataset(path_id="", folder="", use_float_32=False, test_ratio=0.3, valid_ratio=0.1):	
 #def load_dataset(path_id="", use_float_32=False, test_ratio=0.2, valid_ratio=0.1):
 	# reading full dataset
-	features_path = "data/%s/features%s.npy"%(folder, path_id)
-	labels_path = "data/%s/labels%s.npy"%(folder, path_id)
+	features_path = "data-cross/%s/features%s.npy"%(folder, path_id)
+	labels_path = "data-cross/%s/labels%s.npy"%(folder, path_id)
 	
 
 	features = np.load(features_path)
@@ -64,16 +64,21 @@ def load_dataset(path_id="", folder="", use_float_32=False, test_ratio=0.3, vali
 	return ((train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y))	
 	
 	
-def load_full_dataset(path_id=""):
+def load_full_dataset(path_id="", folder="", use_float_32=False):
 	# reading full dataset
-	features_path = "data/features%s.npy"%(path_id)
-	labels_path = "data/labels%s.npy"%(path_id)
+	features_path = "data-cross/%s/features%s.npy"%(folder, path_id)
+	labels_path = "data-cross/%s/labels%s.npy"%(folder, path_id)
+	domains_path = "data-cross/%s/labels%s-domain.csv"%(folder, path_id)
 	
 	features = np.load(features_path)
-	labels = np.load(labels_path)
-
+	if use_float_32:
+		features = features.astype(np.float32)
+	#labels = np.load(labels_path)
+	
 	x = theano.shared(value=features, name='features', borrow=True)
-	y = theano.shared(value=labels, name='labels', borrow=True)
+	y = open(domains_path,'r').read().splitlines()
+	#y = theano.shared(value=labels, name='labels', borrow=True)
+	
 	return (x, y)	
 	
 	

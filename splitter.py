@@ -3,12 +3,12 @@ from sklearn.svm import LinearSVC
 
 class Splitter(object):
 	
-	def __init__(self, features, labels, topics, genres):
+	def __init__(self, features, labels):
 		super(Splitter, self).__init__()
 		self.features = features
 		self.labels = labels
-		self.topics = topics
-		self.genres = genres
+		self.topics = ["Politics", "Society", "World", "UK"]
+		self.genres = [self.topics, "Books"]
 		
 		# hold doamin/topic of each doc
 		self.domains = [label.split("/")[0] for label in self.labels]

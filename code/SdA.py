@@ -48,6 +48,9 @@ import data_handler
 from sklearn.svm import LinearSVC
 from sklearn import cross_validation
 
+sys.path.insert(0, '.')
+from splitter import Splitter
+
 #import threading
 #threadLock = threading.Lock()
 
@@ -333,44 +336,22 @@ class SdA(object):
         return train_fn, valid_score, test_score
 
 				
-    def save_code_features_gpu(self, datasets, features_path="features.csv", experiment="id" ,feature_size=1000, finetune_lr=0.1, pretrain_lr=0.1, noise_level=0.1, best_validation_loss=0, test_score=0):
-        train_set_x, train_set_y = datasets[0]
-        valid_set_x, valid_set_y = datasets[1]
-        test_set_x, test_set_y = datasets[2]
-			
+    def save_code_features_gpu(self, path_id="", folder="", experiment="id", feature_size=1000, finetune_lr=0.1, pretrain_lr=0.1, noise_level=0.1, best_validation_loss=0, test_score=0):
+        x, y = data_handler.load_full_dataset(path_id, folder, True)
+
+        # get code features
         for dA in self.dA_layers:
-            train_set_x = dA.get_hidden_values(train_set_x)
-            valid_set_x = dA.get_hidden_values(valid_set_x)
-            test_set_x = dA.get_hidden_values(test_set_x)
+            x = dA.get_hidden_values(x)
+        x = x.eval()
 
-        # merge all results into single feature matrix
-        train_set_x = train_set_x.eval()
-        valid_set_x = valid_set_x.eval()
-        test_set_x = test_set_x.eval()
-        x = numpy.concatenate((train_set_x, valid_set_x, test_set_x))
-
-        # merge all labels into single array				
-        train_set_y = train_set_y.get_value(borrow=True)
-        valid_set_y = valid_set_y.get_value(borrow=True)
-        test_set_y = test_set_y.get_value(borrow=True)		
-        y = numpy.concatenate((train_set_y, valid_set_y, test_set_y))
-
-        data_handler.save_data(x, y, features_path)
+        # apply svm classification				
+        file = open('deep-cross.csv','a')
+        s = Splitter(x, y)
+        splits = s.split()
+        for domain_a, domain_b, accuracy in splits:
+          file.write("%s,%s,%s,%d,%f,%f,%f,%f,%f,%f\n" %(domain_a, domain_b, experiment, feature_size, noise_level, pretrain_lr, finetune_lr, accuracy, best_validation_loss * 100., test_score * 100.))
+        file.close()
 				
-        # apply svm classification
-        try:				
-          clf = LinearSVC()
-          scores = cross_validation.cross_val_score(clf, x, y, cv=10)
-          accuracy = scores.mean() * 100
-				
-          # save the accuracy
-          #threadLock.acquire()
-          file = open('deep.csv','a')
-          file.write("%s,%d,%f,%f,%f,%f,%f,%f\n" %(experiment, feature_size, noise_level, pretrain_lr, finetune_lr, accuracy, best_validation_loss * 100., test_score * 100.))
-          file.close()
-          #threadLock.release()
-        except:
-					pass				
 								
     def save_code_features_test_train(self, path_id=""):
         train_features_path = "features_train%s.csv"%(path_id)
@@ -391,12 +372,12 @@ class SdA(object):
 
 
 def calculated(experiment, finetune_lr, pretrain_lr, noise_level):
-    with open("deep.csv") as f:
+    with open("deep-cross.csv") as f:
         results = f.readlines()
     for result in results:
         if not "," in result: continue			
         reading = result.strip().split(",")
-        if reading[0] == experiment and float(reading[2]) == noise_level and float(reading[3]) == pretrain_lr and float(reading[4]) == finetune_lr:
+        if reading[2] == experiment and float(reading[4]) == noise_level and float(reading[5]) == pretrain_lr and float(reading[6]) == finetune_lr:
             return True
     return False																	
 		
@@ -579,7 +560,7 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
                 break
 
     end_time = time.clock()
-    sda.save_code_features_gpu(datasets, "features_%s.csv"%(dataset_prefix+dataset_postfix), dataset_prefix+dataset_postfix ,input_size, finetune_lr, pretrain_lr, noise_level, best_validation_loss, test_score)
+    sda.save_code_features_gpu(dataset_postfix, dataset_prefix, dataset_prefix+dataset_postfix ,input_size, finetune_lr, pretrain_lr, noise_level, best_validation_loss, test_score)
 
     print(
         (
@@ -596,7 +577,7 @@ def test_SdA(dataset_postfix='_v', dataset_prefix="", class_count=50, finetune_l
 
 
 if __name__ == '__main__':
-  features = glob.glob("data/1_5-gram*/features*.npy")
+  features = glob.glob("data-cross/*/features*.npy")
   #features = glob.glob("data/words*/features*.npy")
   #features = glob.glob("data/1_5-gram-l1-chi-False/features*.npy")
   # parsing learning rate params
