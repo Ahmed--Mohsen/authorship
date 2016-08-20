@@ -85,14 +85,24 @@ def save_features(x, y, x_file_name="features", y_file_name="labels"):
 	if sps.isspmatrix_csr(x):
 		x = numpy.asarray(x.todense(), numpy.float64)
 	
+	# parse domain/author pairs
+	#domains = [label.split("/")[0] for label in y]
+	authors = [label.split("/")[-1] for label in y]
+	
+	# save domain for each author
+	file = open(y_file_name+"-domain.csv",'w')
+	file.writelines(["%s\n" % label for label in y])
+	file.close()
+	
 	# convert y to numpy array
 	le = preprocessing.LabelEncoder()
-	y = le.fit_transform(y)
+	y = le.fit_transform(authors)
 	y = numpy.asarray(y, numpy.int32)
-
+	
 	#saving to features and labels
 	numpy.save(x_file_name, x)
 	numpy.save(y_file_name, y)
+	
 
 def classify(x, y):
 	clf = LinearSVC()
@@ -134,16 +144,14 @@ def create_dataset(corpus_root, folder_name ,analyzer, norm, ngram, lower, selec
 		if os.path.isfile("%s/features_%d.npy" % (directory, feature_size)):
 			print " Features exist skipping..."
 			continue
-		
 		features = extract_features(x, y, analyzer=analyzer, norm=norm, ngram=ngram, lower=lower, selection=selection, feature_size=feature_size)
 		
-		topics = ["Politics", "Society", "World", "UK"]
-		genres = [topics, "Books"]
-		s = Splitter(features, y, topics, genres)
+		s = Splitter(features, y)
 		splits = s.split()
 		for domain_a, domain_b, accuracy in splits:
 			save_results(domain_a, domain_b, accuracy, feature_size, folder_name)
-		
+			
+		# save the features to be fed to SDA
 		save_features(features, y, "%s/features_%d" % (directory, feature_size), "%s/labels_%d" % (directory, feature_size))
 	
 
