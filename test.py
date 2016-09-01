@@ -17,8 +17,10 @@ for a in range(50):
 
 import glob
 #print glob.glob("data/label*.npy")
-labels = glob.glob("data/*/features*.npy")
+labels = glob.glob("data-cross/*/labels*.npy")
 for label in labels:
 	y = np.load(label)
 	print y.shape
-	print y
+	for i in range(len(y)):
+		print y[i],
+	break
